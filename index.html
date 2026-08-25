@@ -2,10 +2,82 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hello World</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <title>Pizza Prep</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0f1115;--card:#181b21;--border:#292e38;--text:#f3f4f6;--muted:#9aa1ad;--accent:#ffb454;--input:#111318}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+    main{width:min(100% - 28px,480px);margin:0 auto;padding:24px 0 40px}
+    h1{font-size:28px;margin:0 0 6px;letter-spacing:-.5px}
+    .subtitle{color:var(--muted);font-size:14px;margin-bottom:22px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px}
+    label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}
+    select,input{width:100%;height:48px;border:1px solid var(--border);border-radius:11px;background:var(--input);color:var(--text);font:inherit;font-size:17px;padding:0 13px;outline:none}
+    select:focus,input:focus{border-color:var(--accent)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    .total{margin-top:16px;padding:13px 14px;border-radius:11px;background:#20242c;display:flex;justify-content:space-between;align-items:center}
+    .total span{color:var(--muted);font-size:14px}.total strong{font-size:20px}
+    h2{font-size:18px;margin:0 0 14px}
+    .ingredient{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+    .ingredient:last-child{border-bottom:0;padding-bottom:0}.ingredient:first-child{padding-top:0}
+    .ingredient span:first-child{color:var(--muted)}.ingredient strong{font-size:17px}
+    .section-label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:18px 0 8px}
+    .section-label:first-of-type{margin-top:0}
+    .empty{color:var(--muted);font-size:14px}
+  </style>
 </head>
 <body>
-  <h1>Hello World</h1>
+<main>
+  <h1>Pizza Prep</h1>
+  <div class="subtitle">Ingredient calculator</div>
+
+  <section class="card">
+    <label for="recipe">Recipe</label>
+    <select id="recipe">
+      <option value="1">Recipe 1</option>
+      <option value="2">Recipe 2</option>
+    </select>
+
+    <div class="grid">
+      <div>
+        <label for="balls">Number of balls</label>
+        <input id="balls" type="number" inputmode="numeric" min="1" step="1" value="4">
+      </div>
+      <div>
+        <label for="weight">Grams per ball</label>
+        <input id="weight" type="number" inputmode="decimal" min="1" step="1" value="250">
+      </div>
+    </div>
+
+    <div class="total"><span>Total dough</span><strong id="total">1000 g</strong></div>
+  </section>
+
+  <section class="card">
+    <h2>Ingredients</h2>
+    <div id="ingredients"></div>
+  </section>
+</main>
+<script>
+const recipes={
+  1:{total:1400,ingredients:[['Water',550],['Flour',825],['Salt',25]],stages:[['Poolish water',250],['Poolish flour',250],['Final water',300],['Final flour',575],['Salt',25]]},
+  2:{total:1125,ingredients:[['Water',440],['Flour',660],['Salt',25]],stages:[['Poolish water',200],['Poolish flour',200],['Final water',240],['Final flour',460],['Salt',25]]}
+};
+const recipe=document.getElementById('recipe'),balls=document.getElementById('balls'),weight=document.getElementById('weight'),total=document.getElementById('total'),ingredients=document.getElementById('ingredients');
+function fmt(n){return Number.isInteger(n)?n:n.toFixed(1)}
+function calculate(){
+  const r=recipes[recipe.value], b=Math.max(1,Number(balls.value)||0), w=Math.max(0,Number(weight.value)||0), target=b*w, scale=target/r.total;
+  total.textContent=fmt(target)+' g';
+  ingredients.innerHTML='';
+  const groups=[['Total ingredients',r.ingredients],['Poolish / final',r.stages]];
+  groups.forEach(([title,items],i)=>{
+    const label=document.createElement('div');label.className='section-label';label.textContent=title;ingredients.appendChild(label);
+    items.forEach(([name,grams])=>{const row=document.createElement('div');row.className='ingredient';row.innerHTML='<span>'+name+'</span><strong>'+fmt(grams*scale)+' g</strong>';ingredients.appendChild(row)})
+  });
+}
+[recipe,balls,weight].forEach(el=>el.addEventListener('input',calculate));
+calculate();
+</script>
 </body>
 </html>
